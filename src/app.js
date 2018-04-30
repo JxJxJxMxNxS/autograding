@@ -22,12 +22,17 @@ app.use(bodyParser());
 
 app.post('/compile', upload.single('codefile'), function(req, res) {
   var langId = parseInt(req.body.langid);
+  var testFileUrl = req.body.testfileurl;
   var identifier = Math.floor(Math.random() * 1000000);
 
   var langFolder = compilersArr[langId][0];
   var dirToCopy = path.join(__dirname, './usercode/' + langFolder);
   var dest = path.join(__dirname, './code_to_compile/' + identifier);
 
+
+  // Get test file from repo;
+  // Make Http GET request to url and store response
+  // in a testFile;
 
   // Create temp directory
   fs.mkdirSync(dest);
@@ -40,6 +45,8 @@ app.post('/compile', upload.single('codefile'), function(req, res) {
 
     // Write codefile to temp dir
     fs.writeFileSync(path.join(dest, compilersArr[langId][1]), req.file.buffer);
+    // Write test file to temp dir;
+    fs.writeFileSync(path.join(dest, compilersArr[langId][3]), testFile);
 
     // Get compiling command
     var compCommand = compilersArr[langId][2];
