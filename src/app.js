@@ -21,7 +21,17 @@ var port = 3000;
 // app.use(express.static(__dirname));
 app.use(bodyParser());
 
-app.post('/compile', upload.single('codefile'), function(req, res) {
+/*
+  Interface1: unit tests file received as file
+  req.files -> Object where,
+    req.files['fieldname'][0] -> File
+  req.body.langid -> string
+*/
+
+app.post('/compile', upload.fields([{
+  name: 'codefile', maxCount: 1 }, {
+  name: 'testfile', maxCount: 1
+}]), function(req, res) {
   var langId = parseInt(req.body.langid);
   var identifier = Math.floor(Math.random() * 1000000);
 
@@ -39,10 +49,18 @@ app.post('/compile', upload.single('codefile'), function(req, res) {
       throw Error(err);
     }
 
-    var fileName = req.file.originalname;
+    var codeFile = req.files['codefile'][0];
+    var codeFileName = codeFile.originalname;
     var filePath = compilersArr[langId][1];
+
+    var testFile = req.files['testfile'][0];
+    var testFileName = testFile.originalname;
+    var testFilePath = compilersArr[langId][3];
+
     // Write codefile to temp dir
-    fs.writeFileSync(path.join(dest, filePath + fileName), req.file.buffer);
+    fs.writeFileSync(path.join(dest, filePath + codeFileName), codeFile.buffer);
+    // Write testfile to temp dir
+    fs.writeFileSync(path.join(dest, testFilePath + testFileName), testFile.buffer);
 
     // Get compiling command
     var compCommand = compilersArr[langId][2];
