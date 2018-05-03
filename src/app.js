@@ -21,6 +21,13 @@ var port = 3000;
 // app.use(express.static(__dirname));
 app.use(bodyParser());
 
+/*
+  Interface 0: Tests file as base64 string
+    req.file -> user code file
+    req.body.testfilestring -> base64 string (file content)
+    req.testfilename -> string
+*/
+
 app.post('/compile', upload.single('codefile'), function(req, res) {
   var langId = parseInt(req.body.langid);
   var identifier = Math.floor(Math.random() * 1000000);
@@ -41,8 +48,12 @@ app.post('/compile', upload.single('codefile'), function(req, res) {
 
     var fileName = req.file.originalname;
     var filePath = compilersArr[langId][1];
+    var testFileName = req.body.testfilename;
+    var testFilePath = compilersArr[langId][3];
     // Write codefile to temp dir
     fs.writeFileSync(path.join(dest, filePath + fileName), req.file.buffer);
+    // Write test file to temp dir
+    fs.writeFileSync(path.join(dest, testFilePath + testFileName), req.body.testfilestring, 'base64');
 
     // Get compiling command
     var compCommand = compilersArr[langId][2];
